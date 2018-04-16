@@ -1,7 +1,10 @@
-import java.util.Vector;
-import java.net.*;
-import java.io.*;
-import org.json.simple.JSONObject;
+/**
+ * Broadcast class containing the logic for
+ * acting as a Broadcast server.
+ *
+ * @author Cole Polychronis & Matt Gerber
+ */
+
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.net.*;

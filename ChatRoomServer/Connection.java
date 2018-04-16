@@ -2,7 +2,7 @@
  * This is the separate thread that services each
  * incoming echo client request.
  *
- * @author Greg Gagne
+ * @author Cole Polychronis & Matt Gerber
  */
 
 import java.net.*;
