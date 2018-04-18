@@ -32,9 +32,13 @@ public class Handler {
 			if(((Long)requestJSON.get("len")).intValue() <= 20){
 				responseJSON.put("type", "chatroom-response");
 				if(!freeIDs.isEmpty()){
-					responseJSON.put("id", freeIDs.remove(0));
+					Integer freeId = freeIDs.remove(0);
+					responseJSON.put("id", freeId);
 					responseJSON.put("clientNo", clientList.size());
 					responseJSON.put("users", clientList.keySet().toArray());
+					// add new user to clientList
+					String userKey = requestJSON.get("username") + ":" + freeId;
+					clientList.put(userKey, client);
 				}
 				else{
 					responseJSON.put("id", new Integer(-1));
@@ -56,7 +60,19 @@ public class Handler {
 
 			while(true){
 				if(fromClient.ready()){
-					
+					String nextRequest = fromClient.readLine();
+					JSONObject nextReqJSON = new JSONObject((JSONObject)JSONValue.parse(nextRequest));
+					String reqType = nextReqJSON.get("type").toString();
+
+					if(reqType.equals("chatroom-send")){ // client wishes to post to chatroom
+						broadcast(nextReqJSON);
+					}else if(reqType.equals("chatroom-end")){ // client wishes to leave chatroom
+						disconnect(nextReqJSON, clientList, toClient);
+					}else if(reqType.equals("chatroom-special")){ // client wishes to send media message - unsupported on this server
+						returnError(nextReqJSON, toClient);
+					}else{ // client sends an invalid request
+						returnError(nextReqJSON, toClient);
+					}
 				}
 				try { Thread.sleep(1000); } catch (InterruptedException ignore) { }
 
@@ -78,5 +94,44 @@ public class Handler {
 
 	}
 
-	//Method used to check
+	//Methods to handle server response to client
+	private static void broadcast(JSONObject request){
+		String from = request.get("from").toString();
+		String[] to = (String[])request.get("to");
+		String mess = request.get("message").toString();
+		Long len = (Long)request.get("len");
+
+		JSONObject broadcastJSON = new JSONObject();
+		broadcastJSON.put("type", "chatroom-broadcast");
+		broadcastJSON.put("from", from);
+		broadcastJSON.put("to", to);
+		broadcastJSON.put("message", mess);
+		broadcastJSON.put("len", len);
+		// broadcast thread stuff
+
+	}
+
+	private static void returnError(JSONObject request, BufferedOutputStream toClient)throws java.io.IOException{
+		String from = request.get("from").toString();
+		String type = request.get("type").toString();
+
+		JSONObject errorJSON = new JSONObject();
+		errorJSON.put("type", "chatroom-error");
+		errorJSON.put("id", from);
+		if(type.equals("chatroom-special"))
+			errorJSON.put("type_of_error", "special_unsupported");
+		else
+			errorJSON.put("type_of_error", "malformed_dealio");
+		// send out errorJSON
+		toClient.write(errorJSON.toString().getBytes());
+		toClient.flush();
+	}
+
+	private static void disconnect(JSONObject request, ConcurrentHashMap<String, Socket> clientList, BufferedOutputStream toClient)throws java.io.IOException{
+		String id = request.get("id").toString();
+		clientList.remove(id);
+		// call update dealio
+	}
+
+
 }
