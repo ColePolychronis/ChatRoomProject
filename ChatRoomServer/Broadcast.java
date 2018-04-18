@@ -9,7 +9,7 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.net.*;
 import java.io.*;
-import org.json.simple.JSONObject;
+import org.json.simple.*;
 import java.util.*;
 
 public class Broadcast implements Runnable{
@@ -20,15 +20,14 @@ public class Broadcast implements Runnable{
   private Vector<JSONObject> messages;
 
   private void sendToAll(JSONObject message, Iterator it) throws java.io.IOException{
-    BufferedOutputStream toClient = null;
-    while (it.hasNext()) {
+	  BufferedOutputStream toClient = null;
+	 while (it.hasNext()) {
       Map.Entry pair = (Map.Entry)it.next();
-
+      System.out.println(pair.getValue());
       toClient = new BufferedOutputStream(((Socket)pair.getValue()).getOutputStream());
       toClient.write(message.toString().getBytes());
       toClient.flush();
       //System.out.println(pair.getKey() + " = " + pair.getValue());
-      it.remove(); // avoids a ConcurrentModificationException
     }
   }
 
@@ -43,21 +42,24 @@ public class Broadcast implements Runnable{
       while(!messages.isEmpty()){
         //Remove messages and figure out where to send them then send them
         message = messages.remove(0);
+        System.out.println(message);
+        it = clientList.entrySet().iterator();
         // Handles chatroom update
         if(message.get("type").equals("chatroom-update")){
           // iterate through all sockets and send
-          it = clientList.entrySet().iterator();
+          //it = clientList.entrySet().iterator();
           sendToAll(message, it);
 
         }
         // Handles send messages
         else if(message.get("type").equals("chatroom-broadcast")){
-
-          it = clientList.entrySet().iterator();
+        	System.out.println("Broadcasting");
+          //it = clientList.entrySet().iterator();
 
           // If the message goes to everyone
-          if(((String[])message.get("to")).length == 0){
-            sendToAll(message, it);
+          if(((JSONArray)message.get("to")).isEmpty()){
+        	  System.out.println("To All");
+        	  sendToAll(message, it);
           }
           else{
             //If the message is a direct message to certain people
@@ -81,13 +83,12 @@ public class Broadcast implements Runnable{
                   }
                 }
               }
-              it.remove(); // avoids a ConcurrentModificationException
             }
           }
         }
       }
     }
-    
+
   }
 
   public Broadcast(ConcurrentHashMap<String, Socket> clientList, Vector<JSONObject> messages) {

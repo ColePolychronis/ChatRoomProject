@@ -61,13 +61,14 @@ public class Handler {
 			while(true){
 				if(fromClient.ready()){
 					String nextRequest = fromClient.readLine();
+					System.out.println(nextRequest);
 					JSONObject nextReqJSON = new JSONObject((JSONObject)JSONValue.parse(nextRequest));
 					String reqType = nextReqJSON.get("type").toString();
 
 					if(reqType.equals("chatroom-send")){ // client wishes to post to chatroom
-						broadcast(nextReqJSON);
+						broadcast(nextReqJSON, messages);
 					}else if(reqType.equals("chatroom-end")){ // client wishes to leave chatroom
-						disconnect(nextReqJSON, clientList, toClient);
+						disconnect(nextReqJSON, clientList, toClient, freeIDs);
 					}else if(reqType.equals("chatroom-special")){ // client wishes to send media message - unsupported on this server
 						returnError(nextReqJSON, toClient);
 					}else{ // client sends an invalid request
@@ -95,11 +96,11 @@ public class Handler {
 	}
 
 	//Methods to handle server response to client
-	private static void broadcast(JSONObject request){
-		String from = request.get("from").toString();
-		String[] to = (String[])request.get("to");
-		String mess = request.get("message").toString();
-		Long len = (Long)request.get("len");
+	private static void broadcast(JSONObject request, Vector<JSONObject> messages){
+		String from = (String) request.get("from");
+		JSONArray to = (JSONArray)request.get("to");
+		String mess = (String) request.get("message");
+		Long len = (Long)request.get("message-len");
 
 		JSONObject broadcastJSON = new JSONObject();
 		broadcastJSON.put("type", "chatroom-broadcast");
@@ -108,7 +109,7 @@ public class Handler {
 		broadcastJSON.put("message", mess);
 		broadcastJSON.put("len", len);
 		// broadcast thread stuff
-
+		messages.add(broadcastJSON);
 	}
 
 	private static void returnError(JSONObject request, BufferedOutputStream toClient)throws java.io.IOException{
@@ -127,9 +128,11 @@ public class Handler {
 		toClient.flush();
 	}
 
-	private static void disconnect(JSONObject request, ConcurrentHashMap<String, Socket> clientList, BufferedOutputStream toClient)throws java.io.IOException{
+	private static void disconnect(JSONObject request, ConcurrentHashMap<String, Socket> clientList, BufferedOutputStream toClient, Vector<Integer> freeIDs)throws java.io.IOException{
 		String id = request.get("id").toString();
+		freeIDs.add(Integer.valueOf(id.substring(id.indexOf(":") + 1)));
 		clientList.remove(id);
+
 		// call update dealio
 	}
 
