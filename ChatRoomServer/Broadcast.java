@@ -20,6 +20,13 @@ public class Broadcast implements Runnable{
    private Vector<JSONObject> messages;
    public void process(ConcurrentHashMap<String, Socket> clientList, Vector<JSONObject> messages) throws java.io.IOException{
 	   System.out.println("I cant broadcast");
+     while(true){
+       try { Thread.sleep(100); } catch (InterruptedException ignore) { }
+       while(!messages.isEmpty()){
+         //Remove messages and figure out where to send them then send them
+       }
+     }
+
    }
 
    public Broadcast(ConcurrentHashMap<String, Socket> clientList, Vector<JSONObject> messages) {

@@ -52,6 +52,16 @@ public class Handler {
 			toClient.write(responseJSON.toString().getBytes());
 			toClient.flush();
 
+			//While loop which waits for input from the user
+
+			while(true){
+				if(fromClient.ready()){
+					
+				}
+				try { Thread.sleep(1000); } catch (InterruptedException ignore) { }
+
+			}
+
 		}catch(IOException e){
 			System.out.println(e);
 		}
@@ -67,4 +77,6 @@ public class Handler {
 
 
 	}
+
+	//Method used to check
 }
