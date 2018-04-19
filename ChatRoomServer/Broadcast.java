@@ -32,7 +32,6 @@ public class Broadcast implements Runnable{
   }
 
   public void process(ConcurrentHashMap<String, Socket> clientList, Vector<JSONObject> messages) throws java.io.IOException{
-    System.out.println("I cant broadcast");
     BufferedOutputStream toClient = null;
     JSONObject message = null;
     Iterator it = null;

@@ -22,6 +22,7 @@ public class Handler {
 		BufferedOutputStream toClient = null;
 
 		try {
+			int clientID;
 			fromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
 			// read in the dealio request
@@ -69,6 +70,7 @@ public class Handler {
 						broadcast(nextReqJSON, messages);
 					}else if(reqType.equals("chatroom-end")){ // client wishes to leave chatroom
 						disconnect(nextReqJSON, clientList, toClient, freeIDs);
+						break;
 					}else if(reqType.equals("chatroom-special")){ // client wishes to send media message - unsupported on this server
 						returnError(nextReqJSON, toClient);
 					}else{ // client sends an invalid request
