@@ -32,6 +32,7 @@ public class Broadcast implements Runnable{
   }
 
   public void process(ConcurrentHashMap<String, Socket> clientList, Vector<JSONObject> messages) throws java.io.IOException{
+    System.out.println("I cant broadcast");
     BufferedOutputStream toClient = null;
     JSONObject message = null;
     Iterator it = null;
@@ -64,7 +65,7 @@ public class Broadcast implements Runnable{
             //If the message is a direct message to certain people
             while (it.hasNext()) {
               Map.Entry pair = (Map.Entry)it.next();
-              String[] toField = (String[]) message.get("to");
+              JSONArray toField = (JSONArray) message.get("to");
 
               // Sends the message to the from user
               if(message.get("from").equals(pair.getKey())){
@@ -74,8 +75,8 @@ public class Broadcast implements Runnable{
               }
               else{
                 // Also sends the the message to all users defined in the "to" field
-                for(int i = 0; i < toField.length; i++){
-                  if(toField[i].equals(pair.getKey())){
+                for(int i = 0; i < toField.size(); i++){
+                  if(((String)toField.get(i)).equals(pair.getKey())){
                     toClient = new BufferedOutputStream(((Socket)pair.getValue()).getOutputStream());
                     toClient.write(message.toString().getBytes());
                     toClient.flush();

@@ -20,9 +20,9 @@ public class Handler {
 	public void process(Socket client, ConcurrentHashMap<String, Socket> clientList, Vector<JSONObject> messages, Vector<Integer> freeIDs) throws java.io.IOException {
 		BufferedReader fromClient = null;
 		BufferedOutputStream toClient = null;
+		String id = null;
 
 		try {
-			int clientID;
 			fromClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
 			// read in the dealio request
@@ -37,6 +37,8 @@ public class Handler {
 					responseJSON.put("id", freeId);
 					responseJSON.put("clientNo", clientList.size());
 					responseJSON.put("users", clientList.keySet().toArray());
+					id = requestJSON.get("id").toString();
+					broadcastUpdate(id, "enter", messages);
 					// add new user to clientList
 					String userKey = requestJSON.get("username") + ":" + freeId;
 					clientList.put(userKey, client);
@@ -69,7 +71,7 @@ public class Handler {
 					if(reqType.equals("chatroom-send")){ // client wishes to post to chatroom
 						broadcast(nextReqJSON, messages);
 					}else if(reqType.equals("chatroom-end")){ // client wishes to leave chatroom
-						disconnect(nextReqJSON, clientList, toClient, freeIDs);
+						//disconnect(nextReqJSON, clientList, toClient, freeIDs);
 						break;
 					}else if(reqType.equals("chatroom-special")){ // client wishes to send media message - unsupported on this server
 						returnError(nextReqJSON, toClient);
@@ -90,6 +92,9 @@ public class Handler {
 			fromClient.close();
 			if (toClient != null)
 			toClient.close();
+			freeIDs.add(Integer.valueOf(id.substring(id.indexOf(":") + 1)));
+			clientList.remove(id);
+			broadcastUpdate(id, "leave", messages);
 		}
 		// add username:id, client socket to clientList
 		System.out.println("Success!");
@@ -130,13 +135,25 @@ public class Handler {
 		toClient.flush();
 	}
 
-	private static void disconnect(JSONObject request, ConcurrentHashMap<String, Socket> clientList, BufferedOutputStream toClient, Vector<Integer> freeIDs)throws java.io.IOException{
+
+	/*private static void disconnect(JSONObject request, ConcurrentHashMap<String, Socket> clientList, BufferedOutputStream toClient, Vector<Integer> freeIDs)throws java.io.IOException{
 		String id = request.get("id").toString();
 		freeIDs.add(Integer.valueOf(id.substring(id.indexOf(":") + 1)));
 		clientList.remove(id);
 
 		// call update dealio
-	}
+	}*/
 
+	private static void broadcastUpdate(String id, String type, Vector<JSONObject> messages)throws java.io.IOException{
+
+		JSONObject broadcastJSON = new JSONObject();
+		broadcastJSON.put("type", "chatroom-update");
+		broadcastJSON.put("type_of_update", type);
+		broadcastJSON.put("id", id);
+
+		// broadcast thread stuff
+		messages.add(broadcastJSON);
+
+	}
 
 }
