@@ -40,7 +40,7 @@ public class  ChatRoomClient
       sock = new Socket(serverIP, DEFAULT_PORT);
       Runnable serverConnection = new ServerConnection(sock, clientList, toServer, fromServer);
       exec.execute(serverConnection);
-      Runnable fromUser = new FromUser(toServer);
+      Runnable fromUser = new FromUser(toServer, clientName);
       exec.execute(fromUser);
     }
     catch(IOException ioe){
