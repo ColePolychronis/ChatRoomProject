@@ -23,7 +23,7 @@ public class  ChatRoomClient
 	private static final Executor exec = Executors.newCachedThreadPool();
 
 	public static void main(String[] args) throws IOException {
-		Socket sock = null;
+	Socket sock = null;
     Vector<String> clientList = new Vector<String>();
     String clientName = null;
 
@@ -36,10 +36,11 @@ public class  ChatRoomClient
       localBin.close();
 
       sock = new Socket(serverIP, DEFAULT_PORT);
-      Runnable serverConnection = new ServerConnection(sock, clientList, clientName);
-      exec.execute(serverConnection);
       Runnable fromUser = new FromUser(sock, clientName);
       exec.execute(fromUser);
+      Runnable serverConnection = new ServerConnection(sock, clientList, clientName);
+      exec.execute(serverConnection);
+
     }
     catch(IOException ioe){
 
