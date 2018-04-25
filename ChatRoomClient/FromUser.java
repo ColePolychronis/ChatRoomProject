@@ -16,13 +16,15 @@ public class FromUser implements Runnable{
   /**
   * this method is invoked by a separate thread
   */
-  private Vector<JSONObject> toServer = new Vector<JSONObject>();
   private String clientName = null;
+  private Socket sock;
 
-  public void process(Vector<JSONObject> toServer, String clientName) throws java.io.IOException{
+  public void process(Socket sock, String clientName) throws java.io.IOException{
+    PrintWriter toHost = null;
     BufferedReader localBin = null;
     try{
       localBin = new BufferedReader(new InputStreamReader(System.in));
+      toHost = new PrintWriter(sock.getOutputStream(), true);
       String input;
       System.out.println("Please Enter Username");
       input = localBin.readLine();
@@ -31,8 +33,9 @@ public class FromUser implements Runnable{
       beginJSON.put("type", "chatroom-begin");
       beginJSON.put("id", input);
       beginJSON.put("len", input.length());
-      toServer.add(beginJSON);
       clientName = input;
+      toHost.println(beginJSON.toString());
+
       //Resolve error checking for more than 20 len username
 
       while(true){
@@ -42,8 +45,9 @@ public class FromUser implements Runnable{
         messageJSON.put("type", "chatroom-send");
         messageJSON.put("from", clientName);
         messageJSON.put("message", input);
+        messageJSON.put("to", new String[0]);
         messageJSON.put("message-length", input.length());
-        toServer.add(messageJSON);
+        toHost.println(messageJSON.toString());
       }
     }
     catch(IOException ioe){
@@ -55,14 +59,14 @@ public class FromUser implements Runnable{
   }
 
   //Constructor for runnable method
-  public FromUser(Vector<JSONObject> toServer, String clientName) {
-    this.toServer = toServer;
+  public FromUser(Socket sock, String clientName) {
+    this.sock = sock;
     this.clientName = clientName;
   }
 
   public void run() {
     try {
-      process(toServer, clientName);
+      process(sock, clientName);
     }
     catch (java.io.IOException ioe) {
       System.err.println(ioe);

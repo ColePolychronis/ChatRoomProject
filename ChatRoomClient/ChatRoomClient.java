@@ -25,8 +25,6 @@ public class  ChatRoomClient
 	public static void main(String[] args) throws IOException {
 		Socket sock = null;
     Vector<String> clientList = new Vector<String>();
-    Vector<JSONObject> toServer = new Vector<JSONObject>();
-    Vector<JSONObject> fromServer = new Vector<JSONObject>();
     String clientName = null;
 
     BufferedReader localBin = null;
@@ -40,7 +38,7 @@ public class  ChatRoomClient
       sock = new Socket(serverIP, DEFAULT_PORT);
       Runnable serverConnection = new ServerConnection(sock, clientList, toServer, fromServer);
       exec.execute(serverConnection);
-      Runnable fromUser = new FromUser(toServer, clientName);
+      Runnable fromUser = new FromUser(sock, clientName);
       exec.execute(fromUser);
     }
     catch(IOException ioe){
