@@ -20,56 +20,55 @@ public class ServerConnection implements Runnable{
   // private Vector<JSONObject> messages;
   Socket sock;
   Vector<String> clientList;
-  Vector<JSONObject> toServer;
-  Vector<JSONObject> fromServer;
   String clientName;
 
 
-  public void processOutbound(Vector<String> clientList, Vector<JSONObject> messages) throws java.io.IOException{
-    while(!messages.isEmpty()){
-      JSONObject messToServer = messages.remove(0);
-      // set up the necessary communication channels
-			PrintWriter writeToServer = new PrintWriter(this.sock.getOutputStream(),true);
-      writeToServer(messToServer.toString());
-    }
-  }
+  public void proces(Vector<String> clientList,) throws java.io.IOException{
+    BufferedReader serverRead = null;	// the reader from the server
+    try{
+      serverRead = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
-  public void processInbound(Vector<String> clientList, Vector<JSONObject> messages) throws java.io.IOException{
-    while(!messages.isEmpty()){
-      JSONObject messFromServer = messages.remove(0);
-      if(messFromServer.get("type").equals("chatroom-update")){ // if we get an update message from the server
-        if(messFromServer.get("type_of_update").equals("enter")){ // if someone has joined, add them to clientList
-          clientList.add(messFromServer.get("id"));
-          System.out.println("Client " + messFromServer.get("id") + " has joined the chatroom.");
+      while(true){
+        if(serverRead.ready()){
+          String serverResponse = serverRead.readLine();
+          JSONObject dealio = new JSONObject((JSONObject)JSONValue.parse(serverResponse));
+          if(dealio.get("type").equals("chatroom-update")){ // if we get an update message from the server
+            if(dealio.get("type_of_update").equals("enter")){ // if someone has joined, add them to clientList
+              clientList.add(dealio.get("id"));
+              System.out.println("Client " + dealio.get("id") + " has joined the chatroom.");
+            }
+            if(dealio.get("type_of_update").equals("leave")){ // if someone has left, remove them to clientList
+              clientList.remove(dealio.get("id"));
+              System.out.println("Client " + dealio.get("id") + " has left the chatroom.");
+            }
+          }
         }
-        if(messFromServer.get("type_of_update").equals("leave")){ // if someone has left, remove them to clientList
-          clientList.remove(messFromServer.get("id"));
-          System.out.println("Client " + messFromServer.get("id") + " has left the chatroom.");
+        if(dealio.get("type").equals("chatroom-response")){ // if this is the first response from the server, update our user id
+          clientName = clientName.concat(":").concat(dealio.get("id"));
+          System.out.println("The client id has been updated to " + clientName);
         }
+        System.out.println(serverResponse);
+        try { Thread.sleep(1000); } catch (InterruptedException ignore) { }
       }
-      if(messFromServer.get("type").equals("chatroom-response")){
-        clientName = clientName.concat(":").concat(messFromServer.get("id"));
-      }
-      // set up the necessary communication channels
-			System.out.println(messFromServer.toString());
+    }catch(IOException e){
+			System.out.println(e);
+		}
+		finally {
+      if (serverRead != null)
+			serverRead.close();
     }
   }
 
   //Constructor for runnable method
-  public ServerConnection(Socket sock, Vector<String> clientList, Vector<JSONObject> toServer, Vector<JSONObject> fromServer, String clientName) {
+  public ServerConnection(Socket sock, Vector<String> clientList, String clientName) {
     this.sock = sock;
     this.clientList = clientList;
-    this.toServer = toServer;
-    this.fromServer = fromServer;
     this.clientName = clientName;
   }
 
   public void run() {
     try {
-      while(true){
-        processOutbound(toServer);
-        processInbound(fromServer);
-      }
+      process(clientList);
     }
     catch (java.io.IOException ioe) {
       System.err.println(ioe);

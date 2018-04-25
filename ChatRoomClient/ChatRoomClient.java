@@ -36,7 +36,7 @@ public class  ChatRoomClient
       localBin.close();
 
       sock = new Socket(serverIP, DEFAULT_PORT);
-      Runnable serverConnection = new ServerConnection(sock, clientList, toServer, fromServer);
+      Runnable serverConnection = new ServerConnection(sock, clientList, clientName);
       exec.execute(serverConnection);
       Runnable fromUser = new FromUser(sock, clientName);
       exec.execute(fromUser);
