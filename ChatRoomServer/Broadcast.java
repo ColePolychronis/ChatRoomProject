@@ -20,20 +20,21 @@ public class Broadcast implements Runnable{
   private Vector<JSONObject> messages;
 
   private void sendToAll(JSONObject message, Iterator it) throws java.io.IOException{
-	  BufferedOutputStream toClient = null;
+	  PrintWriter toClient = null;
 	 while (it.hasNext()) {
       Map.Entry pair = (Map.Entry)it.next();
       System.out.println(pair.getValue());
-      toClient = new BufferedOutputStream(((Socket)pair.getValue()).getOutputStream());
-      toClient.write(message.toString().getBytes());
-      toClient.flush();
+      toClient = new PrintWriter(((Socket)pair.getValue()).getOutputStream(), true);
+      toClient.println(message.toString());
+
+      //toClient.flush();
       //System.out.println(pair.getKey() + " = " + pair.getValue());
     }
   }
 
   public void process(ConcurrentHashMap<String, Socket> clientList, Vector<JSONObject> messages) throws java.io.IOException{
     System.out.println("I cant broadcast");
-    BufferedOutputStream toClient = null;
+    PrintWriter toClient = null;
     JSONObject message = null;
     Iterator it = null;
     while(true){
@@ -45,19 +46,19 @@ public class Broadcast implements Runnable{
         System.out.println(message);
         it = clientList.entrySet().iterator();
         // Handles chatroom update
-        if(message.get("type").equals("chatroom-update")){
+        if(message.get("type").toString().equals("chatroom-update")){
           // iterate through all sockets and send
           //it = clientList.entrySet().iterator();
           sendToAll(message, it);
 
         }
         // Handles send messages
-        else if(message.get("type").equals("chatroom-broadcast")){
+        else if(message.get("type").toString().equals("chatroom-broadcast")){
         	System.out.println("Broadcasting");
           //it = clientList.entrySet().iterator();
 
           // If the message goes to everyone
-          if(((JSONArray)message.get("to")).isEmpty()){
+          if(((String)message.get("to")).equals("[]")){
         	  System.out.println("To All");
         	  sendToAll(message, it);
           }
@@ -68,18 +69,18 @@ public class Broadcast implements Runnable{
               JSONArray toField = (JSONArray) message.get("to");
 
               // Sends the message to the from user
-              if(message.get("from").equals(pair.getKey())){
-                toClient = new BufferedOutputStream(((Socket)pair.getValue()).getOutputStream());
-                toClient.write(message.toString().getBytes());
-                toClient.flush();
+              if(message.get("from").toString().equals(pair.getKey())){
+                toClient = new PrintWriter(((Socket)pair.getValue()).getOutputStream(), true);
+                toClient.println(message.toString());
+                //toClient.flush();
               }
               else{
                 // Also sends the the message to all users defined in the "to" field
                 for(int i = 0; i < toField.size(); i++){
                   if(((String)toField.get(i)).equals(pair.getKey())){
-                    toClient = new BufferedOutputStream(((Socket)pair.getValue()).getOutputStream());
-                    toClient.write(message.toString().getBytes());
-                    toClient.flush();
+                    toClient = new PrintWriter(((Socket)pair.getValue()).getOutputStream(), true);
+                    toClient.println(message.toString());
+                    //toClient.flush();
                   }
                 }
               }

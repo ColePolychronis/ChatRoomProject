@@ -19,7 +19,7 @@ public class Handler {
 	*/
 	public void process(Socket client, ConcurrentHashMap<String, Socket> clientList, Vector<JSONObject> messages, Vector<Integer> freeIDs) throws java.io.IOException {
 		BufferedReader fromClient = null;
-		BufferedOutputStream toClient = null;
+		PrintWriter toClient = null;
 		String id = null;
 
 		try {
@@ -36,17 +36,20 @@ public class Handler {
 					Integer freeId = freeIDs.remove(0);
 					responseJSON.put("id", freeId);
 					responseJSON.put("clientNo", clientList.size());
-					responseJSON.put("users", clientList.keySet().toArray());
-					id = requestJSON.get("id").toString();
+					responseJSON.put("users", clientList.keySet().toString());
+					//System.out.println(clientList.keySet().toString());
+					//System.out.println(clientList.keySet().toString());
+
+					id = requestJSON.get("username").toString() + ":" + freeId;
 					broadcastUpdate(id, "enter", messages);
 					// add new user to clientList
-					String userKey = requestJSON.get("username") + ":" + freeId;
+					String userKey = requestJSON.get("username").toString() + ":" + freeId;
 					clientList.put(userKey, client);
 				}
 				else{
 					responseJSON.put("id", new Integer(-1));
 					responseJSON.put("clientNo", clientList.size());
-					responseJSON.put("users", clientList.keySet().toArray());
+					responseJSON.put("users", clientList.keySet().toString());
 				}
 			}
 			else{
@@ -55,9 +58,9 @@ public class Handler {
 				String[] errorType = {"user_name_length_exceeded"};
 				responseJSON.put("type_of_error", errorType);
 			}
-			toClient = new BufferedOutputStream(client.getOutputStream());
-			toClient.write(responseJSON.toString().getBytes());
-			toClient.flush();
+			toClient = new PrintWriter(client.getOutputStream(), true);
+			toClient.println(responseJSON.toString());
+			//toClient.flush();
 
 			//While loop which waits for input from the user
 
@@ -105,8 +108,9 @@ public class Handler {
 	//Methods to handle server response to client
 	private static void broadcast(JSONObject request, Vector<JSONObject> messages){
 		String from = (String) request.get("from");
-		JSONArray to = (JSONArray)request.get("to");
+		String to = (String) request.get("to");
 		String mess = (String) request.get("message");
+		//TODO
 		Long len = (Long)request.get("message-len");
 
 		JSONObject broadcastJSON = new JSONObject();
@@ -119,7 +123,7 @@ public class Handler {
 		messages.add(broadcastJSON);
 	}
 
-	private static void returnError(JSONObject request, BufferedOutputStream toClient)throws java.io.IOException{
+	private static void returnError(JSONObject request, PrintWriter toClient)throws java.io.IOException{
 		String from = request.get("from").toString();
 		String type = request.get("type").toString();
 
@@ -131,8 +135,8 @@ public class Handler {
 		else
 			errorJSON.put("type_of_error", "malformed_dealio");
 		// send out errorJSON
-		toClient.write(errorJSON.toString().getBytes());
-		toClient.flush();
+		toClient.println(errorJSON.toString());
+		//toClient.flush();
 	}
 
 
