@@ -30,18 +30,21 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
+import java.util.*;
 
 public class ChatRoomClient extends JFrame implements ActionListener, KeyListener
 {
 	private JButton sendButton;
 	private JButton exitButton;
 	private JTextField sendText;
-	private JTextArea displayArea;
+	private JTextPane displayArea;
+	private JScrollPane spane;
 	private Socket sock = null;
 	private Vector<String> clientList = new Vector<String>();
 	private String clientName = null;
 	private static String ipVal = null;
 	private PrintWriter toHost = null;
+	private JList list;
 
 	public static final int DEFAULT_PORT = 8029;
 
@@ -90,20 +93,25 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		 * a scrollbar with this text area. Note we add the scrollpane
 		 * to the container, not the text area
 		 */
-		displayArea = new JTextArea(15,40);
+		displayArea = new JTextPane();
 		displayArea.setEditable(false);
 		displayArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
 		JScrollPane scrollPane = new JScrollPane(displayArea);
 		getContentPane().add(scrollPane,"Center");
 
+		list = new JList();
+		spane = new JScrollPane();
+		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		spane.getViewport().add(list);
+		getContentPane().add(spane,"East");
 		/**
 		 * set the title and size of the frame
 		 */
-		setTitle("GUI Demo");
+		setTitle("");
 		JButton button = new JButton();
 
-		button.setText("Click me to show dialog!");
+		button.setText("Connect to new Server");
 		p.add(button);
 		button.addActionListener(new java.awt.event.ActionListener() {
 			@Override
@@ -125,12 +133,17 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 					beginJSON.put("len", clientName.length());
 					toHost.println(beginJSON.toString());
 
-					Runnable serverConnection = new ServerConnection(sock, clientList, clientName, displayArea);
+					Runnable serverConnection = new ServerConnection(sock, clientList, clientName, displayArea, list);
 					exec.execute(serverConnection);
 
 				}
 				catch(IOException ioe){
 
+				}
+				finally{
+//					if(sock != null){
+//						sock.close();
+//					}
 				}
 			}
 
@@ -160,7 +173,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		if (source == sendButton)
 		 	sendMessage();
 		else if (source == exitButton)
-		  System.exit(0);
+			System.exit(0);
 	}
 
 	/**
@@ -173,7 +186,18 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		 messageJSON.put("type", "chatroom-send");
 		 messageJSON.put("from", clientName);
 		 messageJSON.put("message", input);
-		 messageJSON.put("to", "[]");
+		 ArrayList<String> selection = new ArrayList(list.getSelectedValuesList());
+		 if(selection.isEmpty()){
+			 messageJSON.put("to", "[]");
+		 }
+		 else{
+			 String[] selectionArray = selection.toArray(new String[selection.size()]);
+			 JSONArray recipients = new JSONArray();
+			 for(int i = 0; i < selectionArray.length; i ++){
+				 recipients.add(selectionArray[i]);
+			 }
+			 messageJSON.put("to", recipients);
+		 }
 		 messageJSON.put("message-length", input.length());
 		 toHost.println(messageJSON.toString());
 

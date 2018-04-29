@@ -36,7 +36,12 @@ public class Handler {
 					Integer freeId = freeIDs.remove(0);
 					responseJSON.put("id", freeId);
 					responseJSON.put("clientNo", clientList.size());
-					responseJSON.put("users", clientList.keySet().toString());
+					JSONArray clients = new JSONArray();
+					String[] clientArray = clientList.keySet().toArray(new String[clientList.size()]);
+					for(int i = 0; i < clientArray.length; i ++){
+						clients.add(clientArray[i]);
+					}
+					responseJSON.put("users", clients);
 					//System.out.println(clientList.keySet().toString());
 					//System.out.println(clientList.keySet().toString());
 
@@ -108,10 +113,10 @@ public class Handler {
 	//Methods to handle server response to client
 	private static void broadcast(JSONObject request, Vector<JSONObject> messages){
 		String from = (String) request.get("from");
-		String to = (String) request.get("to");
+		JSONArray to = (JSONArray) request.get("to");
 		String mess = (String) request.get("message");
 		//TODO
-		Long len = (Long)request.get("message-len");
+		int len = ((Long)request.get("message-len")).intValue();
 
 		JSONObject broadcastJSON = new JSONObject();
 		broadcastJSON.put("type", "chatroom-broadcast");
