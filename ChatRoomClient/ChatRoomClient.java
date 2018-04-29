@@ -41,6 +41,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 	private Vector<String> clientList = new Vector<String>();
 	private String clientName = null;
 	private static String ipVal = null;
+	private PrintWriter toHost = null;
 
 	public static final int DEFAULT_PORT = 8029;
 
@@ -107,15 +108,24 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		button.addActionListener(new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				ipVal = JOptionPane.showInputDialog(p,
-						"Enter the Server IP:", null);
-				try{
+				ipVal = JOptionPane.showInputDialog(p, "Enter the Server IP:", null);
 
+				try{
 					sock = new Socket(ipVal, DEFAULT_PORT);
+					toHost = new PrintWriter(sock.getOutputStream(), true);
 					System.out.println("Connected");
-					Runnable fromUser = new FromUser(sock, clientName);
-					exec.execute(fromUser);
-					Runnable serverConnection = new ServerConnection(sock, clientList, clientName, displayArea;);
+
+					//Runnable fromUser = new FromUser(sock, clientName);
+					//exec.execute(fromUser);
+					clientName = JOptionPane.showInputDialog(p, "Enter Your Username:", null);
+					JSONObject beginJSON = new JSONObject();
+					//Create username
+					beginJSON.put("type", "chatroom-begin");
+					beginJSON.put("username", clientName);
+					beginJSON.put("len", clientName.length());
+					toHost.println(beginJSON.toString());
+
+					Runnable serverConnection = new ServerConnection(sock, clientList, clientName, displayArea);
 					exec.execute(serverConnection);
 
 				}
@@ -139,24 +149,6 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 
 	}
 
-	/**
-	 * This gets the text the user entered and outputs it
-	 * in the display area.
-	 */
-	public void displayText() {
-		String message = sendText.getText().trim();
-		StringBuffer buffer = new StringBuffer(message.length());
-
-		// now reverse it
-		for (int i = message.length()-1; i >= 0; i--)
-			buffer.append(message.charAt(i));
-
-		displayArea.append(buffer.toString() + "\n");
-
-		sendText.setText("");
-		sendText.requestFocus();
-	}
-
 
 	/**
 	 * This method responds to action events .... i.e. button clicks
@@ -166,23 +158,35 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		Object source = evt.getSource();
 
 		if (source == sendButton)
-			displayText();
+		 	sendMessage();
 		else if (source == exitButton)
-			System.exit(0);
+		  System.exit(0);
 	}
 
 	/**
 	 * These methods responds to keystroke events and fulfills
 	 * the contract of the KeyListener interface.
 	 */
+	 public void sendMessage(){
+		 String input = sendText.getText().trim();
+		 JSONObject messageJSON = new JSONObject();
+		 messageJSON.put("type", "chatroom-send");
+		 messageJSON.put("from", clientName);
+		 messageJSON.put("message", input);
+		 messageJSON.put("to", "[]");
+		 messageJSON.put("message-length", input.length());
+		 toHost.println(messageJSON.toString());
 
+		 sendText.setText("");
+     sendText.requestFocus();
+	 }
 	/**
 	 * This is invoked when the user presses
 	 * the ENTER key.
 	 */
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_ENTER)
-			displayText();
+			sendMessage();
 	}
 
 	/** Not implemented */

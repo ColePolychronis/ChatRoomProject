@@ -31,7 +31,7 @@ public class FromUser implements Runnable{
       JSONObject beginJSON = new JSONObject();
       //Create username
       beginJSON.put("type", "chatroom-begin");
-      beginJSON.put("id", input);
+      beginJSON.put("username", input);
       beginJSON.put("len", input.length());
       clientName = input;
       toHost.println(beginJSON.toString());
