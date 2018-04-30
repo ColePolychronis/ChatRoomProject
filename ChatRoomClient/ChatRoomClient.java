@@ -63,7 +63,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		/**
 		 * set up all the components
 		 */
-		sendText = new JTextField(30);
+		sendText = new JTextField(255);
 		sendButton = new JButton("Send");
 		exitButton = new JButton("Exit");
 
@@ -116,41 +116,15 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		button.addActionListener(new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				ipVal = JOptionPane.showInputDialog(p, "Enter the Server IP:", null);
-
-				try{
-					sock = new Socket(ipVal, DEFAULT_PORT);
-					toHost = new PrintWriter(sock.getOutputStream(), true);
-					System.out.println("Connected");
-
-					//Runnable fromUser = new FromUser(sock, clientName);
-					//exec.execute(fromUser);
-					clientName = JOptionPane.showInputDialog(p, "Enter Your Username:", null);
-					JSONObject beginJSON = new JSONObject();
-					//Create username
-					beginJSON.put("type", "chatroom-begin");
-					beginJSON.put("username", clientName);
-					beginJSON.put("len", clientName.length());
-					toHost.println(beginJSON.toString());
-
-					Runnable serverConnection = new ServerConnection(sock, clientList, clientName, displayArea, list);
-					exec.execute(serverConnection);
-
-				}
-				catch(IOException ioe){
-
-				}
-				finally{
-//					if(sock != null){
-//						sock.close();
-//					}
-				}
+				connectToServer(p, list);
 			}
 
 		});
+
 		pack();
 
 		setVisible(true);
+		connectToServer(p, list);
 		sendText.requestFocus();
 
 		/** anonymous inner class to handle window closing events */
@@ -186,6 +160,38 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 				}
 			}
 			System.exit(0);
+		}
+	}
+
+	public void connectToServer(JPanel p, JList list){
+		ipVal = JOptionPane.showInputDialog(p, "Enter the Server IP:", null);
+
+		try{
+			sock = new Socket(ipVal, DEFAULT_PORT);
+			toHost = new PrintWriter(sock.getOutputStream(), true);
+			System.out.println("Connected");
+
+			//Runnable fromUser = new FromUser(sock, clientName);
+			//exec.execute(fromUser);
+			clientName = JOptionPane.showInputDialog(p, "Enter Your Username:", null);
+			JSONObject beginJSON = new JSONObject();
+			//Create username
+			beginJSON.put("type", "chatroom-begin");
+			beginJSON.put("username", clientName);
+			beginJSON.put("len", clientName.length());
+			toHost.println(beginJSON.toString());
+
+			Runnable serverConnection = new ServerConnection(sock, clientList, clientName, displayArea, list);
+			exec.execute(serverConnection);
+
+		}
+		catch(IOException ioe){
+
+		}
+		finally{
+//			if(sock != null){
+//				sock.close();
+//			}
 		}
 	}
 
