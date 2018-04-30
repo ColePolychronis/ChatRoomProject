@@ -25,7 +25,7 @@ import java.io.*;
 import java.util.concurrent.*;
 import org.json.simple.*;
 import java.util.Vector;
-import java.util.HashMap;
+import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -36,7 +36,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 	private JButton sendButton;
 	private JButton exitButton;
 	private JTextField sendText;
-	private JTextArea displayArea;
+	private JTextPane displayArea;
 	private JScrollPane spane;
 	private Socket sock = null;
 	private Vector<String> clientList = new Vector<String>();
@@ -92,7 +92,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		 * a scrollbar with this text area. Note we add the scrollpane
 		 * to the container, not the text area
 		 */
-		displayArea = new JTextArea(15,40);
+		displayArea = new JTextPane();
 		displayArea.setEditable(false);
 		displayArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
@@ -115,7 +115,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		button.addActionListener(new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				connectToServer(p, list);
+				connectToServer(p);
 			}
 
 		});
@@ -143,7 +143,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 				System.exit(0);
 			}
 		} );
-		connectToServer(p, list);
+		connectToServer(p);
 	}
 
 
@@ -172,7 +172,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		}
 	}
 
-	public void connectToServer(JPanel p, JList list){
+	public void connectToServer(JPanel p){
 		ipVal = JOptionPane.showInputDialog(p, "Enter the Server IP:", null);
 
 		try{
