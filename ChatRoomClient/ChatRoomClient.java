@@ -63,7 +63,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		/**
 		 * set up all the components
 		 */
-		sendText = new JTextField(255);
+		sendText = new JTextField(30);
 		sendButton = new JButton("Send");
 		exitButton = new JButton("Exit");
 
@@ -124,7 +124,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		pack();
 
 		setVisible(true);
-		connectToServer(p, list);
+
 		sendText.requestFocus();
 
 		/** anonymous inner class to handle window closing events */
@@ -139,7 +139,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 				System.exit(0);
 			}
 		} );
-
+		connectToServer(p, list);
 	}
 
 
