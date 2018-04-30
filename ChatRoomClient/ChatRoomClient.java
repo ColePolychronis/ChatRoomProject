@@ -23,7 +23,7 @@
 import java.net.*;
 import java.io.*;
 import java.util.concurrent.*;
-import org.json.simple.JSONObject;
+import org.json.simple.*;
 import java.util.Vector;
 import java.util.HashMap;
 import java.awt.*;
@@ -205,7 +205,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		 messageJSON.put("type", "chatroom-send");
 		 messageJSON.put("from", clientName);
 		 messageJSON.put("message", input);
-		 messageJSON.put("to", "[]");
+		 messageJSON.put("to", new JSONArray());
 		 messageJSON.put("message-length", input.length());
 		 toHost.println(messageJSON.toString());
 
