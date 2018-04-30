@@ -100,6 +100,9 @@ public class Handler {
 			fromClient.close();
 			if (toClient != null)
 			toClient.close();
+			if (client != null){
+				client.close();
+			}
 			freeIDs.add(Integer.valueOf(id.substring(id.indexOf(":") + 1)));
 			clientList.remove(id);
 			broadcastUpdate(id, "leave", messages);

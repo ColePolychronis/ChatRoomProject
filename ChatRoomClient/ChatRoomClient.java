@@ -30,7 +30,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
-import java.util.*;
 
 public class ChatRoomClient extends JFrame implements ActionListener, KeyListener
 {
@@ -44,7 +43,6 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 	private String clientName = null;
 	private static String ipVal = null;
 	private PrintWriter toHost = null;
-	private JList list;
 
 	public static final int DEFAULT_PORT = 8029;
 
@@ -100,10 +98,12 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		JScrollPane scrollPane = new JScrollPane(displayArea);
 		getContentPane().add(scrollPane,"Center");
 
-		list = new JList();
+		JList list = new JList();
 		spane = new JScrollPane();
-		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		spane.getViewport().add(list);
+		JLabel label = new JLabel("Connected Users");
+		label.setFont(new Font("SansSerif", Font.PLAIN, 12));
+		//createLayout(spane, label);
 		getContentPane().add(spane,"East");
 		/**
 		 * set the title and size of the frame
@@ -156,6 +156,12 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		/** anonymous inner class to handle window closing events */
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent evt) {
+				if(sock != null){
+					try {
+						sock.close();
+					} catch (IOException e) {
+					}
+				}
 				System.exit(0);
 			}
 		} );
@@ -172,8 +178,15 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 
 		if (source == sendButton)
 		 	sendMessage();
-		else if (source == exitButton)
+		else if (source == exitButton){
+			if(sock != null){
+				try {
+					sock.close();
+				} catch (IOException e) {
+				}
+			}
 			System.exit(0);
+		}
 	}
 
 	/**
@@ -186,18 +199,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		 messageJSON.put("type", "chatroom-send");
 		 messageJSON.put("from", clientName);
 		 messageJSON.put("message", input);
-		 ArrayList<String> selection = new ArrayList(list.getSelectedValuesList());
-		 if(selection.isEmpty()){
-			 messageJSON.put("to", "[]");
-		 }
-		 else{
-			 String[] selectionArray = selection.toArray(new String[selection.size()]);
-			 JSONArray recipients = new JSONArray();
-			 for(int i = 0; i < selectionArray.length; i ++){
-				 recipients.add(selectionArray[i]);
-			 }
-			 messageJSON.put("to", recipients);
-		 }
+		 messageJSON.put("to", "[]");
 		 messageJSON.put("message-length", input.length());
 		 toHost.println(messageJSON.toString());
 
