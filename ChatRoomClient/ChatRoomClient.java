@@ -36,13 +36,14 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 	private JButton sendButton;
 	private JButton exitButton;
 	private JTextField sendText;
-	private JTextPane displayArea;
+	private JTextArea displayArea;
 	private JScrollPane spane;
 	private Socket sock = null;
 	private Vector<String> clientList = new Vector<String>();
 	private String clientName = null;
 	private static String ipVal = null;
 	private PrintWriter toHost = null;
+	private JList list;
 
 	public static final int DEFAULT_PORT = 8029;
 
@@ -91,19 +92,17 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		 * a scrollbar with this text area. Note we add the scrollpane
 		 * to the container, not the text area
 		 */
-		displayArea = new JTextPane();
+		displayArea = new JTextArea(15,40);
 		displayArea.setEditable(false);
 		displayArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
 		JScrollPane scrollPane = new JScrollPane(displayArea);
 		getContentPane().add(scrollPane,"Center");
 
-		JList list = new JList();
+		list = new JList();
 		spane = new JScrollPane();
 		spane.getViewport().add(list);
-		JLabel label = new JLabel("Connected Users");
-		label.setFont(new Font("SansSerif", Font.PLAIN, 12));
-		//createLayout(spane, label);
+		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		getContentPane().add(spane,"East");
 		/**
 		 * set the title and size of the frame
@@ -224,7 +223,18 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		 messageJSON.put("type", "chatroom-send");
 		 messageJSON.put("from", clientName);
 		 messageJSON.put("message", input);
-		 messageJSON.put("to", new JSONArray());
+		 ArrayList<String> selection = new ArrayList(list.getSelectedValuesList());
+		 if(selection.isEmpty()){
+			 messageJSON.put("to", new JSONArray());
+		 }
+		 else{
+			 String[] selectionArray = selection.toArray(new String[selection.size()]);
+			 JSONArray recipients = new JSONArray();
+			 for(int i = 0; i < selectionArray.length; i ++){
+				 recipients.add(selectionArray[i]);
+			 }
+			 messageJSON.put("to", recipients);
+		 }
 		 messageJSON.put("message-length", input.length());
 		 toHost.println(messageJSON.toString());
 
