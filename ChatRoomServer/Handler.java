@@ -119,7 +119,7 @@ public class Handler {
 		JSONArray to = (JSONArray) request.get("to");
 		String mess = (String) request.get("message");
 		//TODO
-		int len = ((Long)request.get("message-len")).intValue();
+		int len = ((Long)request.get("message-length")).intValue();
 
 		JSONObject broadcastJSON = new JSONObject();
 		broadcastJSON.put("type", "chatroom-broadcast");
