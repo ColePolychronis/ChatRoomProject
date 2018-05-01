@@ -196,10 +196,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		try{
 			sock = new Socket(ipVal, DEFAULT_PORT);
 			toHost = new PrintWriter(sock.getOutputStream(), true);
-			System.out.println("Connected");
 
-			//Runnable fromUser = new FromUser(sock, clientName);
-			//exec.execute(fromUser);
 			clientNameBuilder.append(JOptionPane.showInputDialog(p, "Enter Your Username:", null));
 			JSONObject beginJSON = new JSONObject();
 			//Create username
@@ -267,9 +264,6 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 	public static void main(String[] args) {
 		JFrame win = new ChatRoomClient();
 
-		//Socket sock = null;
-		//Vector<String> clientList = new Vector<String>();
-		//String clientName = null;
 
 	}
 }
