@@ -29,12 +29,13 @@ public class ServerConnection implements Runnable{
   // private Vector<JSONObject> messages;
   Socket sock;
   Vector<String> clientList;
-  String clientName;
+  // static String clientName;
+  StringBuilder clientNameBuilder;
   JTextPane displayArea;
   JList list;
 
 
-  public void process(Socket sock, Vector<String> clientList, String clientName, JTextPane displayArea, JList list) throws java.io.IOException{
+  public void process(Socket sock, Vector<String> clientList, StringBuilder clientNameBuilder, JTextPane displayArea, JList list) throws java.io.IOException{
     BufferedReader serverRead = null;	// the reader from the server
     try{
       serverRead = new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -70,7 +71,19 @@ public class ServerConnection implements Runnable{
       if(toFriends.isEmpty()){
         addColoredText(displayArea, dealio.get("from").toString() + ": " + dealio.get("message").toString() + "\n", Color.BLACK);
       }else{
-        addColoredText(displayArea, dealio.get("from").toString() + ": " + dealio.get("message").toString() + "\n", Color.CYAN);
+        String friends = "";
+        for(int i=0; i<toFriends.size(); i++){
+          if(i == 0){
+            friends = friends.concat(toFriends.get(i));
+          }else if(i == toFriends.size()-1){
+            friends = friends.concat("and " + (toFriends.get(i)));
+          }else{
+            friends = friends.concat(toFriends.get(i) + ", ");
+          }
+
+        }
+
+        addColoredText(displayArea, dealio.get("from").toString() + " has sent the following message to " + friends + ": "  + dealio.get("message").toString() + "\n", Color.CYAN);
       }
       System.out.println(dealio.get("message").toString());
     }else if(dealio.get("type").toString().equals("chatroom-update")){ // if we get an update message from the server
@@ -95,7 +108,10 @@ public class ServerConnection implements Runnable{
 
       }
       else{
-      clientName = clientName.concat(":").concat(dealio.get("id").toString());
+      // clientName = clientName.concat(":").concat(Integer.toString(((Long)dealio.get("id")).intValue()));
+      clientNameBuilder.append(":" + Integer.toString(((Long)dealio.get("id")).intValue()));
+      System.out.println(clientNameBuilder.toString());
+      System.out.println("Badass int: " + Integer.toString(((Long)dealio.get("id")).intValue()));
       JSONArray clients = (JSONArray)dealio.get("users");
       for(int i = 0; i < clients.size(); i++){
         clientList.add((String)clients.get(i));
@@ -109,17 +125,17 @@ public class ServerConnection implements Runnable{
   }
 
   //Constructor for runnable method
-  public ServerConnection(Socket sock, Vector<String> clientList, String clientName, JTextPane displayArea, JList list) {
+  public ServerConnection(Socket sock, Vector<String> clientList, StringBuilder clientNameBuilder, JTextPane displayArea, JList list) {
     this.sock = sock;
     this.clientList = clientList;
-    this.clientName = clientName;
+    this.clientNameBuilder = clientNameBuilder;
     this.displayArea = displayArea;
     this.list = list;
   }
 
   public void run() {
     try {
-      process(sock, clientList, clientName, displayArea, list);
+      process(sock, clientList, clientNameBuilder, displayArea, list);
     }
     catch (java.io.IOException ioe) {
       System.err.println(ioe);

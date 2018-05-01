@@ -40,7 +40,8 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 	private JScrollPane spane;
 	private Socket sock = null;
 	private Vector<String> clientList = new Vector<String>();
-	private String clientName = null;
+	// private static String clientName = null;
+	private StringBuilder clientNameBuilder = new StringBuilder();
 	private static String ipVal = null;
 	private PrintWriter toHost = null;
 	private JList list;
@@ -133,7 +134,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 					JSONObject endJSON = new JSONObject();
 					//Create username
 					endJSON.put("type", "chatroom-end");
-					endJSON.put("id", clientName);
+					endJSON.put("id", clientNameBuilder.toString());
 					toHost.println(endJSON.toString());
 					try {
 						sock.close();
@@ -161,7 +162,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 				JSONObject endJSON = new JSONObject();
 				//Create username
 				endJSON.put("type", "chatroom-end");
-				endJSON.put("id", clientName);
+				endJSON.put("id", clientNameBuilder.toString());
 				toHost.println(endJSON.toString());
 				try {
 					sock.close();
@@ -182,15 +183,15 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 
 			//Runnable fromUser = new FromUser(sock, clientName);
 			//exec.execute(fromUser);
-			clientName = JOptionPane.showInputDialog(p, "Enter Your Username:", null);
+			clientNameBuilder.append(JOptionPane.showInputDialog(p, "Enter Your Username:", null));
 			JSONObject beginJSON = new JSONObject();
 			//Create username
 			beginJSON.put("type", "chatroom-begin");
-			beginJSON.put("username", clientName);
-			beginJSON.put("len", clientName.length());
+			beginJSON.put("username", clientNameBuilder.toString());
+			beginJSON.put("len", clientNameBuilder.length());
 			toHost.println(beginJSON.toString());
 
-			Runnable serverConnection = new ServerConnection(sock, clientList, clientName, displayArea, list);
+			Runnable serverConnection = new ServerConnection(sock, clientList, clientNameBuilder, displayArea, list);
 			exec.execute(serverConnection);
 
 		}
@@ -221,7 +222,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		 String input = sendText.getText().trim();
 		 JSONObject messageJSON = new JSONObject();
 		 messageJSON.put("type", "chatroom-send");
-		 messageJSON.put("from", clientName);
+		 messageJSON.put("from", clientNameBuilder.toString());
 		 messageJSON.put("message", input);
 		 ArrayList<String> selection = new ArrayList(list.getSelectedValuesList());
 		 if(selection.isEmpty()){
