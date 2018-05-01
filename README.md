@@ -15,9 +15,10 @@ Steps to Running DDOS server:
 Sending a message is simple, type the message and hit the send button or press enter on your keyboard.
 To direct-message a user click on their name, any highlighted name will be sent the private message.
 The app can also send a direct message to multiple users, use shift+click to select multiple users.
-To deselect a user from the client list to message everyone again ctrl+click highlighted names.
+To deselect a user from the client list to message everyone again ctrl+click (Command+click on mac) highlighted names.
 
 ### Bonus Features
 DDOS includes a client list so users can easily see who is in the chatroom.
 Direct-DDOSing (Direct Message) support is included between any number of clients so the user can direct message as many/few people as they want.
 Speaking of seeing who's in the chatroom, we have optimized the color palette to make it as (difficult) easy as possible to distinguish between private and public messages.
+You can also connect to a new server without exiting the app. Simply click the "Connect to New Server" button.
