@@ -216,18 +216,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 
 		}
 		finally{
-//			if(sock != null){
-//				JSONObject endJSON = new JSONObject();
-//				//Create username
-//				endJSON.put("type", "chatroom-end");
-//				endJSON.put("id", clientName);
-//				toHost.println(endJSON.toString());
-//
-//				try {
-//					sock.close();
-//				} catch (IOException e) {
-//				}
-//			}
+
 		}
 	}
 
