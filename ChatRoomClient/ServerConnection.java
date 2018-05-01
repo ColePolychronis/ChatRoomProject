@@ -25,11 +25,8 @@ public class ServerConnection implements Runnable{
   /**
   * this method is invoked by a separate thread
   */
-  // private ConcurrentHashMap<String, Socket> clientList;
-  // private Vector<JSONObject> messages;
   Socket sock;
   Vector<String> clientList;
-  // static String clientName;
   StringBuilder clientNameBuilder;
   JTextPane displayArea;
   JList list;
@@ -42,11 +39,8 @@ public class ServerConnection implements Runnable{
 
       while(true){
         if(serverRead.ready()){
-
           String serverResponse = serverRead.readLine();
-          System.out.println("Stuff from server has been read: " + serverResponse.toString());
           JSONObject dealio = new JSONObject((JSONObject)JSONValue.parse(serverResponse));
-          System.out.println("JSON object created");
           processDealio(dealio);
         }
       }
@@ -64,9 +58,7 @@ public class ServerConnection implements Runnable{
   * in the display area.
   */
   public void processDealio(JSONObject dealio) {
-	  System.out.println("Process dealio called");
     if(dealio.get("type").toString().equals("chatroom-broadcast")){
-      //displayArea.append(dealio.get("from").toString() + ": " + dealio.get("message").toString() + "\n");
       JSONArray toFriends = (JSONArray)dealio.get("to");
       if(toFriends.isEmpty()){
         addColoredText(displayArea, dealio.get("from").toString() + ": " + dealio.get("message").toString() + "\n", Color.BLACK);
@@ -85,41 +77,31 @@ public class ServerConnection implements Runnable{
 
         addColoredText(displayArea, "From " + dealio.get("from").toString() + " to " + friends + ": "  + dealio.get("message").toString() + "\n", Color.CYAN);
       }
-      System.out.println(dealio.get("message").toString());
     }else if(dealio.get("type").toString().equals("chatroom-update")){ // if we get an update message from the server
       if(dealio.get("type_of_update").equals("enter")){ // if someone has joined, add them to clientList
         clientList.add((String)dealio.get("id"));
         list.setListData(clientList);
-        //displayArea.append("Client " + dealio.get("id") + " has joined the chatroom.\n");
         addColoredText(displayArea, "Client " + dealio.get("id") + " has joined the chatroom.\n", Color.MAGENTA);
 
       }
       if(dealio.get("type_of_update").toString().equals("leave")){ // if someone has left, remove them to clientList
         clientList.remove(dealio.get("id"));
         list.setListData(clientList);
-        // displayArea.append("Client " + dealio.get("id") + " has left the chatroom.\n");
         addColoredText(displayArea, "Client " + dealio.get("id") + " has left the chatroom.\n", Color.MAGENTA);
 
       }
     }else if(dealio.get("type").toString().equals("chatroom-response")){ // if this is the first response from the server, update our user id
       if(((Long)dealio.get("id")).intValue() == -1){
-        // displayArea.append("Server is Full :(, try again later\n");
         addColoredText(displayArea, "Server is Full :(, try again later\n", Color.GREEN);
 
       }
       else{
-      // clientName = clientName.concat(":").concat(Integer.toString(((Long)dealio.get("id")).intValue()));
       clientNameBuilder.append(":" + Integer.toString(((Long)dealio.get("id")).intValue()));
-      System.out.println(clientNameBuilder.toString());
-      System.out.println("Badass int: " + Integer.toString(((Long)dealio.get("id")).intValue()));
       JSONArray clients = (JSONArray)dealio.get("users");
       for(int i = 0; i < clients.size(); i++){
         clientList.add((String)clients.get(i));
-
       }
     }
-
-      // System.out.println("The client id has been updated to " + clientName);
     }
 
   }

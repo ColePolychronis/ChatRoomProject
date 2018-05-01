@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class  ChatRoomServer
 {
 	public static final int DEFAULT_PORT = 8029;
-	public static final int maxUsers = 3; // maximum amount of users that can occupy chatroom at a time
+	public static final int maxUsers = 15; // maximum amount of users that can occupy chatroom at a time
 
     // construct a thread pool for concurrency
 	private static final Executor exec = Executors.newCachedThreadPool();

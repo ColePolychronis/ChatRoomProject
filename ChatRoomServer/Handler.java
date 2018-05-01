@@ -27,7 +27,6 @@ public class Handler {
 
 			// read in the dealio request
 			String requestLine = fromClient.readLine();
-			//String requestLine2 = "{\"username\":\"Matt\", \"len\":4}";
 			JSONObject requestJSON = new JSONObject((JSONObject)JSONValue.parse(requestLine));
 			JSONObject responseJSON = new JSONObject();
 			if(((Long)requestJSON.get("len")).intValue() <= 20){
@@ -42,8 +41,6 @@ public class Handler {
 						clients.add(clientArray[i]);
 					}
 					responseJSON.put("users", clients);
-					//System.out.println(clientList.keySet().toString());
-					//System.out.println(clientList.keySet().toString());
 
 					id = requestJSON.get("username").toString() + ":" + freeId;
 					broadcastUpdate(id, "enter", messages);
@@ -65,14 +62,12 @@ public class Handler {
 			}
 			toClient = new PrintWriter(client.getOutputStream(), true);
 			toClient.println(responseJSON.toString());
-			//toClient.flush();
 
 			//While loop which waits for input from the user
 
 			while(true){
 				if(fromClient.ready()){
 					String nextRequest = fromClient.readLine();
-					System.out.println(nextRequest);
 					JSONObject nextReqJSON = new JSONObject((JSONObject)JSONValue.parse(nextRequest));
 					String reqType = nextReqJSON.get("type").toString();
 
@@ -107,9 +102,6 @@ public class Handler {
 			clientList.remove(id);
 			broadcastUpdate(id, "leave", messages);
 		}
-		// add username:id, client socket to clientList
-		System.out.println("Success!");
-
 
 	}
 
@@ -118,7 +110,6 @@ public class Handler {
 		String from = (String) request.get("from");
 		JSONArray to = (JSONArray) request.get("to");
 		String mess = (String) request.get("message");
-		//TODO
 		int len = ((Long)request.get("message-length")).intValue();
 
 		JSONObject broadcastJSON = new JSONObject();
@@ -144,17 +135,7 @@ public class Handler {
 			errorJSON.put("type_of_error", "malformed_dealio");
 		// send out errorJSON
 		toClient.println(errorJSON.toString());
-		//toClient.flush();
 	}
-
-
-	/*private static void disconnect(JSONObject request, ConcurrentHashMap<String, Socket> clientList, BufferedOutputStream toClient, Vector<Integer> freeIDs)throws java.io.IOException{
-		String id = request.get("id").toString();
-		freeIDs.add(Integer.valueOf(id.substring(id.indexOf(":") + 1)));
-		clientList.remove(id);
-
-		// call update dealio
-	}*/
 
 	private static void broadcastUpdate(String id, String type, Vector<JSONObject> messages)throws java.io.IOException{
 
