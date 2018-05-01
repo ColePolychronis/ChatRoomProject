@@ -47,7 +47,7 @@ public class Broadcast implements Runnable{
         // Handles send messages
         else if(message.get("type").toString().equals("chatroom-broadcast")){
           // If the message goes to everyone
-          if(((String)message.get("to")).equals("[]")){
+          if((((JSONArray)message.get("to"))).isEmpty()){
         	  sendToAll(message, it);
           }
           else{

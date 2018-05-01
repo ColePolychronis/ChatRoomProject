@@ -30,6 +30,9 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.PlainDocument;
+import javax.swing.text.StyledDocument;
 
 public class ChatRoomClient extends JFrame implements ActionListener, KeyListener
 {
@@ -40,6 +43,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 	private JScrollPane spane;
 	private Socket sock = null;
 	private Vector<String> clientList = new Vector<String>();
+	// private static String clientName = null;
 	private StringBuilder clientNameBuilder = new StringBuilder();
 	private static String ipVal = null;
 	private PrintWriter toHost = null;
@@ -107,7 +111,7 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		/**
 		 * set the title and size of the frame
 		 */
-		setTitle("");
+		setTitle("Dealio Delivery (Optimal) Service - DDOS");
 		JButton button = new JButton();
 
 		button.setText("Connect to new Server");
@@ -115,6 +119,20 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		button.addActionListener(new java.awt.event.ActionListener() {
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
+				clientNameBuilder = new StringBuilder();
+				clientList.clear();
+				displayArea.setStyledDocument(new DefaultStyledDocument());
+				if(sock != null){
+					JSONObject endJSON = new JSONObject();
+					//Create username
+					endJSON.put("type", "chatroom-end");
+					endJSON.put("id", clientNameBuilder.toString());
+					toHost.println(endJSON.toString());
+					try {
+						sock.close();
+					} catch (IOException e) {
+					}
+				}
 				connectToServer(p);
 			}
 
@@ -178,6 +196,10 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 		try{
 			sock = new Socket(ipVal, DEFAULT_PORT);
 			toHost = new PrintWriter(sock.getOutputStream(), true);
+			System.out.println("Connected");
+
+			//Runnable fromUser = new FromUser(sock, clientName);
+			//exec.execute(fromUser);
 			clientNameBuilder.append(JOptionPane.showInputDialog(p, "Enter Your Username:", null));
 			JSONObject beginJSON = new JSONObject();
 			//Create username
@@ -194,6 +216,18 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 
 		}
 		finally{
+//			if(sock != null){
+//				JSONObject endJSON = new JSONObject();
+//				//Create username
+//				endJSON.put("type", "chatroom-end");
+//				endJSON.put("id", clientName);
+//				toHost.println(endJSON.toString());
+//
+//				try {
+//					sock.close();
+//				} catch (IOException e) {
+//				}
+//			}
 		}
 	}
 
@@ -243,6 +277,10 @@ public class ChatRoomClient extends JFrame implements ActionListener, KeyListene
 
 	public static void main(String[] args) {
 		JFrame win = new ChatRoomClient();
+
+		//Socket sock = null;
+		//Vector<String> clientList = new Vector<String>();
+		//String clientName = null;
 
 	}
 }
