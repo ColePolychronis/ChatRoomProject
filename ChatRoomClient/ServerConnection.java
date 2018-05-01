@@ -74,7 +74,7 @@ public class ServerConnection implements Runnable{
         String friends = "";
         for(int i=0; i<toFriends.size(); i++){
           if(i == 0){
-            friends = friends.concat(toFriends.get(i));
+            friends = friends.concat(toFriends.get(i).toString() + " ");
           }else if(i == toFriends.size()-1){
             friends = friends.concat("and " + (toFriends.get(i)));
           }else{
@@ -83,7 +83,7 @@ public class ServerConnection implements Runnable{
 
         }
 
-        addColoredText(displayArea, dealio.get("from").toString() + " has sent the following message to " + friends + ": "  + dealio.get("message").toString() + "\n", Color.CYAN);
+        addColoredText(displayArea, "From " + dealio.get("from").toString() + " to " + friends + ": "  + dealio.get("message").toString() + "\n", Color.CYAN);
       }
       System.out.println(dealio.get("message").toString());
     }else if(dealio.get("type").toString().equals("chatroom-update")){ // if we get an update message from the server
